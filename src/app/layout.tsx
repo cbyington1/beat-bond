@@ -19,10 +19,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="bg-bbbackground">
+        <body className="bg-black">
           <SidebarProvider>
             <AppSidebar />
-            <main>
+            <main className="h-screen w-screen">
               {children}
             </main>
           </SidebarProvider>
