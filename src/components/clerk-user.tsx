@@ -14,7 +14,7 @@ export function ClerkUser() {
         )
     }
     return (
-        <div className='content-center'>{(user.username)}</div>
+        <div className='content-center'>{(user.firstName)}</div>
     )
 }
     
