@@ -1,31 +1,14 @@
 // app/api/spotify/route.ts
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { getSpotifyAuthToken } from "../getAuthToken";
 
 export async function GET() {
-  // Get the current user ID using Clerk's auth object
-  const { userId } = await auth();
-
-  // Check if the user is authenticated
-  if (!userId) {
-    return NextResponse.json({ message: "User not found" }, { status: 401 });
-  }
 
   try {
-    // Use the correct provider ID
-    const provider = "oauth_spotify"; // Make sure this matches your Clerk configuration
-
-    // Call the Clerk API to get the user's OAuth access tokens
-    const clerkResponse = await (await clerkClient()).users.getUserOauthAccessToken(userId, provider)
-
-    // Log the Clerk response to debug
-    console.log("Clerk Response:", clerkResponse);
-
-    // Extract token from the response
-    const accessToken = clerkResponse.data[0]?.token; // Use .data as shown in the logs
+    const token = await getSpotifyAuthToken()
 
     // Check if the accessToken is undefined
-    if (!accessToken) {
+    if (!token) {
       return NextResponse.json(
         { message: "Access token is undefined" },
         { status: 500 }
@@ -33,13 +16,13 @@ export async function GET() {
     }
 
     // Fetch the user data from the Spotify API
-    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks";
+    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=5";
 
     // Call the Spotify API with the access token
     const spotifyResponse = await fetch(spotifyUrl, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
 
