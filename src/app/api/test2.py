@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime, timedelta
 from flask import Flask, redirect, request, jsonify, session
+from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 import os
 
@@ -12,10 +13,11 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'abcdefg'
+CORS(app, supports_credentials=True, origins="http://localhost:3000")
 
 CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIPY_ClIENT_SECRET")
-REDIRECT_URI = 'http://localhost:5000/callback'
+REDIRECT_URI = 'http://localhost:3450/api/callback'
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
@@ -28,16 +30,17 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
                                                scope=SCOPE,
                                                show_dialog=True))
     
-@app.route('/')
+@app.route('/api')
 def index():
     return "<a href='/login'>Login with Spotify</a>"
 
-@app.route('/login')
+@app.route("/api/login")
+@cross_origin(supports_credentials=True, origins="http://localhost:3000")
 def login():
     auth_url = sp.auth_manager.get_authorize_url()
     return redirect(auth_url)
 
-@app.route("/callback")
+@app.route("/api/callback")
 def callback():
     if 'error' in request.args:
         return jsonify({"error": request.args['error']})
@@ -56,7 +59,8 @@ def callback():
     else:
         return jsonify({"error": "Authorization code missing"})
 
-@app.route('/playlists')
+@app.route('/api/playlists', methods=['GET'])
+
 def get_playlists():
         if 'access_token' not in session:
              return redirect('/login')
@@ -73,17 +77,18 @@ def get_playlists():
 
         return jsonify(playlists)
 
-@app.route('/top-tracks')
-def get_top_tracks(limit=50):
+@app.route('/api/top-tracks', methods=['GET'])
+@cross_origin(supports_credentials=True, origins="http://localhost:3000")
+def get_top_tracks(limit=10):
         if 'access_token' not in session:
-             return redirect('/login')
+             return redirect('/api/login')
         
         if datetime.now().timestamp() > session['expires_at']:
-             return redirect('/refresh-token')
+             return redirect('/api/refresh-token')
         
         # Get user's top tracks from Spotify.
         results = sp.current_user_top_tracks(limit=limit, time_range='short_term')
-        return [item['id'] for item in results['items']]
+        return jsonify(results)
 
 def create_embedding(features):
     # Create an embedding from audio features.
@@ -109,13 +114,14 @@ def get_recommendations(seed_tracks, limit=20):
     recommendations = sp.recommendations(seed_tracks=seed_tracks, limit=limit)
     return [track['id'] for track in recommendations['tracks']]
 
-@app.route('/recommendation')
+@app.route('/api/recommendation', methods=['GET'])
+@cross_origin(supports_credentials=True, origins="http://localhost:3000")
 def recommendation():
     if 'access_token' not in session:
-        return redirect('/login')
+        return redirect('/api/login')
         
     if datetime.now().timestamp() > session['expires_at']:
-        return redirect('/refresh-token')
+        return redirect('/api/refresh-token')
         
     # Get user's top tracks
     user_top_tracks = get_top_tracks()
@@ -144,12 +150,12 @@ def recommendation():
         track_info = sp.track(track_id)
         print(f"{i}. {track_info['name']} by {track_info['artists'][0]['name']}")
     
-    return redirect('/top-tracks')
+    return redirect('/api/top-tracks')
 
-@app.route('/refresh-token')
+@app.route('/api/refresh-token')
 def refresh_token():
         if 'refresh_token' not in session:
-             return redirect('/login')
+             return redirect('/api/login')
         
         if datetime.now().timestamp() > session['expires_at']:
              req_body = {
@@ -165,8 +171,7 @@ def refresh_token():
         session['access_token'] = new_token_info.get('access_token')
         session['expires_at'] = datetime.now().timestamp() + new_token_info['expires_in'] 
 
-        return redirect('/playlists')
+        return redirect('/api/playlists')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug = True)
-    
+    app.run(host='0.0.0.0', port=3450, debug = True)

@@ -4,6 +4,8 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { useUser } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
+import SpotifyProfile from "@/components/spotifyprofile";
+
 
 export default function Home() {
 
@@ -40,6 +42,7 @@ export default function Home() {
         <div className="p-4">
           <Image src='/bblogo.jpeg' alt="bblogo" width={150} height={150} className="rounded-xl"></Image>
           <p>Hello {username}!</p>
+          <SpotifyProfile />
         </div>
       </Card>
     </div>

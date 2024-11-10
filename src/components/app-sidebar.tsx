@@ -5,6 +5,7 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -45,7 +46,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SignedOut>
         <SignedIn>
           <div className="inline-flex space-x-2">
-            <UserButton />
+            <UserButton 
+              userProfileProps={{
+                additionalOAuthScopes: {
+                  spotify: ['user-top-read', 'user-read-recently-played', 'playlist-modify-public']
+                },
+              }}          
+            />
             <ClerkUser />
           </div>
         </SignedIn>
@@ -65,6 +72,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+      </SidebarFooter>
       </div>
     </Sidebar>
   )
