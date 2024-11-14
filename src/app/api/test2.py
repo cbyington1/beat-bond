@@ -60,7 +60,6 @@ def callback():
         return jsonify({"error": "Authorization code missing"})
 
 @app.route('/api/playlists', methods=['GET'])
-
 def get_playlists():
         if 'access_token' not in session:
              return redirect('/login')
@@ -116,16 +115,11 @@ def get_recommendations(seed_tracks, limit=20):
 
 @app.route('/api/recommendation', methods=['GET'])
 @cross_origin(supports_credentials=True, origins="http://localhost:3000")
-def recommendation():
-    if 'access_token' not in session:
-        return redirect('/api/login')
-        
-    if datetime.now().timestamp() > session['expires_at']:
-        return redirect('/api/refresh-token')
-        
+def recommendation():                
+    user_top_tracks = request.args.get('tracks')
     # Get user's top tracks
-    user_top_tracks = get_top_tracks()
-    print(f"Fetched {len(user_top_tracks)} top tracks for the user.")
+    #user_top_tracks = get_top_tracks()
+    #print(f"Fetched {len(user_top_tracks)} top tracks for the user.")
  
     # Get recommendations based on user's top tracks
     recommended_tracks = get_recommendations(user_top_tracks[:5])  # Use top 5 tracks as seeds
@@ -150,7 +144,7 @@ def recommendation():
         track_info = sp.track(track_id)
         print(f"{i}. {track_info['name']} by {track_info['artists'][0]['name']}")
     
-    return redirect('/api/top-tracks')
+    return sorted_recommendations
 
 @app.route('/api/refresh-token')
 def refresh_token():

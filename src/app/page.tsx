@@ -1,4 +1,5 @@
 'use client'
+
 import Image from "next/image";
 import React from "react";
 import { Card } from "@/components/ui/card";
@@ -6,9 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
 import MainPage from "@/components/mainpage";
 
-
 export default function Home() {
-
   const { isLoaded, isSignedIn, user } = useUser()
   if (!isLoaded) {
     return (

@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 
-const MainPage = () => {
+const URL = "http://127.0.0.1:3450/recommendation";
+
+const GenRecommendations = () => {
   const { isSignedIn } = useAuth(); // Clerk hook to check authentication state
   interface Track {
     id: string;
@@ -12,22 +14,23 @@ const MainPage = () => {
     };
     artists: { href: string; name: string }[];
   }
-
   interface SpotifyData {
     items: Track[];
   }
 
-  const [data, setData] = useState<SpotifyData | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  const [recData, setRecData] = useState<SpotifyData | null>(null);
+  
   useEffect(() => {
+  // Fetch top tracks first
     const fetchTopTracks = async () => {
       try {
         const response = await fetch("/api/top-tracks");
         const jsondata = await response.json();
 
         if (response.ok) {
-          setData(jsondata.message);
+          // After getting top tracks, fetch recommendations
+          fetchRecFromFlask(jsondata.message);
         } else {
           setError(jsondata.message || "Failed to fetch top tracks");
         }
@@ -36,27 +39,44 @@ const MainPage = () => {
       }
     };
 
+    // Modified to include top tracks data in URL
+    const fetchRecFromFlask = async (topTracks: SpotifyData) => {
+      try {
+        // Create URL with top tracks as query parameter
+        const tracksParam = topTracks.items
+          .slice(0, 5)
+          .map(track => track.id)
+          .join(',');
+        
+        const recommendationUrl = `${URL}?tracks=${tracksParam}`;
+        const response = await fetch(recommendationUrl);
+        const jsondata = await response.json();
+
+        if (response.ok) {
+          setRecData(jsondata.message);
+        } else {
+          setError(jsondata.message || "Failed to fetch recommendations");
+        }
+      } catch {
+        setError("An error occurred while fetching recommendations");
+      }
+    };
     if (isSignedIn) {
       fetchTopTracks();
     }
-  }, [isSignedIn]); // Ensure this effect only runs if the user is signed in
-
-  if (!isSignedIn) {
-    return <div>Please sign in to view your Spotify profile.</div>;
-  }
+  }, [isSignedIn]);
 
   if (error) {
     return <div>Error: {error}</div>;
   }
-
-  if (!data) {
+  if (!recData) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
       <h1>Top Tracks</h1>
-      {data.items.slice(0, 5).map((track) => (
+      {recData.items.slice(0, 5).map((track) => (
         <li key={track.id} className="p-2 list-none">
           <div className="inline-flex items-center">
             {track.album.images && track.album.images.length > 0 && (
@@ -74,5 +94,4 @@ const MainPage = () => {
     </div>
   );
 };
-
-export default MainPage;
+export default GenRecommendations;
