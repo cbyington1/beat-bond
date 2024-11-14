@@ -26,7 +26,7 @@ const data = {
       url: "/playlists",
     },
     {
-      title: "Generate",
+      title: "Recommendations",
       url: "/recommendations",
     },
     {
