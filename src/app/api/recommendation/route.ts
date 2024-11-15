@@ -2,6 +2,15 @@
 import { NextResponse } from "next/server";
 import { getSpotifyAuthToken } from "../getAuthToken";
 
+interface Track {
+  id: string;
+  name: string;
+  album: {
+    images: { url: string }[];
+  };
+  artists: { href: string; name: string }[];
+}
+
 export async function GET() {
   try {
     const token = await getSpotifyAuthToken();
@@ -75,7 +84,7 @@ export async function GET() {
         },
   
         body: JSON.stringify({
-          topTracks: spotifyData.items.map((track: any) => track.id),
+          topTracks: spotifyData.items.map((track: Track) => track.id),
           // recommendations: recommendationsData.tracks,
         }),
   

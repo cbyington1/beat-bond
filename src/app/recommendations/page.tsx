@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth, ClerkProvider } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 
 const Page = () => {

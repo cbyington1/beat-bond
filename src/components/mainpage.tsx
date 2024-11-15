@@ -10,7 +10,7 @@ const MainPage = () => {
     album: {
       images: { url: string }[];
     };
-    artists: { href: string; name: string }[];
+    artists: { name: string }[];
   }
 
   interface SpotifyData {
