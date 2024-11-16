@@ -114,6 +114,7 @@ export async function GET() {
 
     const trackInfo = await recommendationsResponse.json();
 
+
     console.log("hi")
     // Return both top tracks and recommendations
     return NextResponse.json({

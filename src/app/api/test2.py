@@ -112,7 +112,7 @@ def get_track_features(track_id):
         features['tempo']
     ])
 
-def get_recommendations(seed_tracks, limit=20):
+def get_recommendations(seed_tracks, limit=50):
     # Get track recommendations based on seed tracks.
     recommendations = sp.recommendations(seed_tracks=seed_tracks, limit=limit)
     return [track['id'] for track in recommendations['tracks']]
@@ -157,7 +157,7 @@ def recommendation():
         # # Sort recommendations by similarity
         sorted_recommendations = [x for _, x in sorted(zip(similarities, recommended_tracks), reverse=True)]
         tracks = [sp.track(track_id) for track_id in sorted_recommendations]
-        formatted_tracks = [track["id"] for track in tracks]
+        formatted_tracks = [track["id"] for i, track in enumerate(tracks[:10], 1)]
         
         generated = True
         print(formatted_tracks)
