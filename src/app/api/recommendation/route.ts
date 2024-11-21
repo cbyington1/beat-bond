@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     // Fetch the user data from the Spotify API
-    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=10&time_range=long_term";
+    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term";
 
     // Call the Spotify API with the access token
     const spotifyResponse = await fetch(spotifyUrl, {
