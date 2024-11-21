@@ -33,14 +33,22 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
                                                scope=SCOPE,
                                                show_dialog=True))   
 
+# add cache
+track_features_cache = {}
+track_info_cache = {}
+
 def create_embedding(features):
     # Create an embedding from audio features.
     return features / np.linalg.norm(features)
 
 def get_track_features(track_id):
-    # Get audio features for a track from Spotify API.
+    # check cache for dupes
+    if track_id in track_features_cache:
+        return track_features_cache[track_id]
+    
+    # api call
     features = sp.audio_features(track_id)[0]
-    return np.array([
+    result = np.array([
         features['danceability'],
         features['energy'],
         features['loudness'],
@@ -51,9 +59,13 @@ def get_track_features(track_id):
         features['valence'],
         features['tempo']
     ])
+    
+    # store in cache
+    track_features_cache[track_id] = result
+    return result
 
 def get_recommendations(seed_tracks, limit=50):
-    # Get track recommendations based on seed tracks.
+    # batch processing
     recommendations = sp.recommendations(seed_tracks=seed_tracks, limit=limit)
     return [track['id'] for track in recommendations['tracks']]
 
@@ -63,53 +75,60 @@ def recommendation():
     global generated
     global formatted_tracks
 
-    if generated or formatted_tracks != None:
-        print(formatted_tracks)
+    if generated or formatted_tracks is not None:
         return jsonify(formatted_tracks), 200
     
     try:
         data = request.get_json()
         top_tracks = data.get('topTracks')
-        # recommendations = data.get('recommendations')
         
         print("Received top tracks:", top_tracks)
-        # print("Received recommendations:", recommendations)
-
-        # # Get user's top tracks
-        top_tracks = top_tracks
         print(f"Fetched {len(top_tracks)} top tracks for the user.")
     
-        # # Get recommendations based on user's top tracks
-        recommended_tracks = get_recommendations(top_tracks[:5])  # Use top 5 tracks as seeds
+        # Get recommendations
+        recommended_tracks = get_recommendations(top_tracks[:5], limit=50)
         print(f"Fetched {len(recommended_tracks)} recommended tracks.")
     
-        # # Create embeddings for user's top tracks and recommended tracks
-        user_embeddings = np.array([create_embedding(get_track_features(track)) for track in top_tracks])
-        recommended_embeddings = np.array([create_embedding(get_track_features(track)) for track in recommended_tracks])
+        # batch processing
+        all_tracks = top_tracks + recommended_tracks
+        features_list = sp.audio_features(all_tracks)
+        
+        # update cache
+        for track_id, features in zip(all_tracks, features_list):
+            if features:  
+                track_features_cache[track_id] = np.array([
+                    features['danceability'],
+                    features['energy'],
+                    features['loudness'],
+                    features['speechiness'],
+                    features['acousticness'],
+                    features['instrumentalness'],
+                    features['liveness'],
+                    features['valence'],
+                    features['tempo']
+                ])
     
-        # # Calculate average user embedding
+        # Create embeddings 
+        user_embeddings = np.array([create_embedding(track_features_cache[track]) for track in top_tracks])
+        recommended_embeddings = np.array([create_embedding(track_features_cache[track]) for track in recommended_tracks])
+    
+        # Calculate similarities
         avg_user_embedding = np.mean(user_embeddings, axis=0)
-    
-        # # Calculate cosine similarity
         similarities = cosine_similarity([avg_user_embedding], recommended_embeddings)[0]
     
-        # # Sort recommendations by similarity
+        # Sort and format results
         sorted_recommendations = [x for _, x in sorted(zip(similarities, recommended_tracks), reverse=True)]
-        tracks = [sp.track(track_id) for track_id in sorted_recommendations]
-        formatted_tracks = [track["id"] for i, track in enumerate(tracks[:10], 1)]
+        
+        # batch processing for track info
+        tracks_info = sp.tracks(sorted_recommendations)['tracks']
+        formatted_tracks = [track["id"] for track in tracks_info[:50]]
         
         generated = True
-        print(formatted_tracks)
         return jsonify(formatted_tracks), 200
+        
     except Exception as e:
+        print(f"Error in recommendation: {str(e)}")
         return jsonify({"error": str(e)}), 500
-    # # Print top 10 recommendations
-    # print("\nTop 10 Personalized Recommendations:")
-    # for i, track_id in enumerate(sorted_recommendations[:20], 1):
-    #     track_info = sp.track(track_id)
-    #     print(f"{i}. {track_info['name']} by {track_info['artists'][0]['name']}")
-    
-    # return redirect('/api/top-tracks')
 
 @app.route('/api/stats', methods=['POST'])
 @cross_origin(supports_credentials=True, origins="http://localhost:3000")
