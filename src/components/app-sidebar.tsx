@@ -31,7 +31,7 @@ const data = {
     },
     {
       title: "Stats",
-      url: "/statistics",
+      url: "/stats",
     },
   ],
 }

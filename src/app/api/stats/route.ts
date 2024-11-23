@@ -1,13 +1,11 @@
-// app/api/spotify/route.ts
+// app/api/stats/route.ts
 import { NextResponse } from "next/server";
 import { getSpotifyAuthToken } from "../getAuthToken";
 
 export async function GET() {
-
   try {
-    const token = await getSpotifyAuthToken()
+    const token = await getSpotifyAuthToken();
 
-    // Check if the accessToken is undefined
     if (!token) {
       return NextResponse.json(
         { message: "Access token is undefined" },
@@ -16,7 +14,7 @@ export async function GET() {
     }
 
     // Fetch the user data from the Spotify API
-    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=5&time_range=long_term";
+    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term";
 
     // Call the Spotify API with the access token
     const spotifyResponse = await fetch(spotifyUrl, {
@@ -41,17 +39,47 @@ export async function GET() {
 
     const spotifyData = await spotifyResponse.json();
 
-    // Log the Spotify data to debug
-    console.log("Spotify Data:", spotifyData);
+    const backendResponse = await fetch(
+      'http://localhost:3450/api/stats',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+  
+        body: JSON.stringify({
+          topTracks: spotifyData.items.map((track: any) => track.id),
+        }),
+  
+      }
+    );
+  
+    if (!backendResponse.ok) {
+      const errorData = await backendResponse.json();
+      console.error("Backend Error:", errorData);
+      return NextResponse.json(
+        { message: "Failed to fetch recommendations from backend", error: errorData },
+        { status: backendResponse.status }
+      );
+    }
 
-    // Return the Spotify data in the response
-    return NextResponse.json({ message: spotifyData });
+    const genres = await backendResponse.json();
+
+
+    console.log(genres)
+
+    // Return both top tracks and recommendations
+    return NextResponse.json({
+      topTracks: spotifyData.items,
+      genres: genres
+    });
   } catch (error) {
-    // Catch and handle any errors during the API request
     console.error("Error fetching Spotify data:", error);
     return NextResponse.json(
-      { message: "Internal Server Error", error: "server error" },
+      { message: "Internal Server Error", error: String(error) },
       { status: 500 }
     );
   }
+  
+  
 }

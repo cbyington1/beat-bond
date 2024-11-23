@@ -1,0 +1,28 @@
+stat route: @app.route('/analyze-genres')
+def analyze_user_genres():
+    if 'access_token' not in session:
+        return redirect('/login')
+   
+    if datetime.now().timestamp() > session['expires_at']:
+        return redirect('/refresh-token')
+   
+    user_top_tracks = get_top_tracks(20)
+    artist_ids = set()
+    for track_id in user_top_tracks:
+        track_info = sp.track(track_id)
+        artist_ids.add(track_info['artists'][0]['id'])
+   
+    genre_counts = {}
+    artist_ids = list(artist_ids)
+   
+    for i in range(0, len(artist_ids), 50):
+        batch = artist_ids[i:i+50]
+        artists_info = sp.artists(batch)['artists']
+        for artist in artists_info:
+            for genre in artist['genres']:
+                genre_counts[genre] = genre_counts.get(genre, 0) + 1
+   
+    sorted_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)
+    total_genres = sum(genre_counts.values())
+    genre_percentages = {genre: (count / total_genres) * 100 for genre, count in sorted_genres}
+    return jsonify(genre_percentages)
