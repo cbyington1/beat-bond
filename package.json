@@ -22,12 +22,12 @@
     "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "convex": "^1.17.2",
     "lucide-react": "^0.453.0",
     "next": "14.2.14",
     "next-themes": "^0.3.0",
     "react": "^18",
     "react-dom": "^18",
-    "supabase": "^1.219.2",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7"
   },

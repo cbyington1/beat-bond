@@ -27,11 +27,11 @@ const data = {
     },
     {
       title: "Recommendations",
-      url: "/recommendations",
+      url: "/protected/recommendations",
     },
     {
       title: "Stats",
-      url: "/stats",
+      url: "/protected/stats",
     },
   ],
 }

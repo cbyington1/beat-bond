@@ -9,6 +9,7 @@ import MainPage from "@/components/mainpage";
 
 export default function Home() {
   const { isLoaded, isSignedIn, user } = useUser()
+
   if (!isLoaded) {
     return (
       <div className="h-full w-full py-2 pr-2">
