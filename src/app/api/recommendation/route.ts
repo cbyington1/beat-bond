@@ -1,18 +1,12 @@
 // app/api/recommendation/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSpotifyAuthToken } from "../getAuthToken";
 
-interface Track {
-  id: string;
-  name: string;
-  album: {
-    images: { url: string }[];
-  };
-  artists: { href: string; name: string }[];
-}
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const timeRange = searchParams.get('time_range') || 'long_term';
+
     const token = await getSpotifyAuthToken();
 
     if (!token) {
@@ -23,7 +17,7 @@ export async function GET() {
     }
 
     // Fetch the user data from the Spotify API
-    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term";
+    const spotifyUrl = `https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=${timeRange}`;
 
     // Call the Spotify API with the access token
     const spotifyResponse = await fetch(spotifyUrl, {
@@ -48,7 +42,6 @@ export async function GET() {
 
     const spotifyData = await spotifyResponse.json();
 
-
     const backendResponse = await fetch(
       'http://localhost:3450/api/recommendation',
       {
@@ -58,8 +51,7 @@ export async function GET() {
         },
   
         body: JSON.stringify({
-          topTracks: spotifyData.items.map((track: Track) => track.id),
-          // recommendations: recommendationsData.tracks,
+          topTracks: spotifyData.items.map((track: any) => track.id),
         }),
   
       }
@@ -96,7 +88,6 @@ export async function GET() {
     }
 
     const trackInfo = await recommendationsResponse.json();
-
 
     console.log("hi")
     // Return both top tracks and recommendations

@@ -1,9 +1,12 @@
 // app/api/stats/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSpotifyAuthToken } from "../getAuthToken";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const timeRange = searchParams.get('time_range') || 'long_term';
+
     const token = await getSpotifyAuthToken();
 
     if (!token) {
@@ -14,7 +17,7 @@ export async function GET() {
     }
 
     // Fetch the user data from the Spotify API
-    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term";
+    const spotifyUrl = `https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=${timeRange}`;
 
     // Call the Spotify API with the access token
     const spotifyResponse = await fetch(spotifyUrl, {

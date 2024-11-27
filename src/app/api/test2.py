@@ -75,8 +75,8 @@ def recommendation():
     global generated
     global formatted_tracks
 
-    if generated or formatted_tracks is not None:
-        return jsonify(formatted_tracks), 200
+    # if generated or formatted_tracks is not None:
+    #     return jsonify(formatted_tracks), 200
     
     try:
         data = request.get_json()
