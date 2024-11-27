@@ -48,32 +48,6 @@ export async function GET() {
 
     const spotifyData = await spotifyResponse.json();
 
-    
-
-    // Get track IDs for recommendations
-    // const seedTracks = spotifyData.items.map((track: any) => track.id).join(',');
-
-    // // Fetch recommendations using the top tracks as seeds
-    // const recommendationsResponse = await fetch(
-    //   `https://api.spotify.com/v1/recommendations?limit=50&seed_tracks=${seedTracks}`,
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //       'Content-Type': 'application/json',
-    //     },
-    //   }
-    // );
-
-    // if (!recommendationsResponse.ok) {
-    //   const errorData = await recommendationsResponse.json();
-    //   console.error("Recommendations API Error:", errorData);
-    //   return NextResponse.json(
-    //     { message: "Failed to fetch recommendations", error: errorData },
-    //     { status: recommendationsResponse.status }
-    //   );
-    // }
-
-    // const recommendationsData = await recommendationsResponse.json();
 
     const backendResponse = await fetch(
       'http://localhost:3450/api/recommendation',
@@ -137,6 +111,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-  
-  
 }

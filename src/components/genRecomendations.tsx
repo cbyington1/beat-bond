@@ -75,7 +75,6 @@ const GenRecommendations = () => {
 
   return (
     <div>
-      <h1>Top Tracks</h1>
       {recData.items.slice(0, 5).map((track) => (
         <li key={track.id} className="p-2 list-none">
           <div className="inline-flex items-center">
