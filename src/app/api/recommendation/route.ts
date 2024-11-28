@@ -67,7 +67,7 @@ export async function GET() {
     // const recommendationsData = await recommendationsResponse.json();
 
     const backendResponse = await fetch(
-      'http://localhost:3450/api/recommendation',
+      'http://localhost:4000/api/recommendation',
       {
         method: 'POST',
         headers: {

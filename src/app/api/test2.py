@@ -20,7 +20,7 @@ CORS(app, supports_credentials=True, origins="http://localhost:3000")
 
 CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIPY_ClIENT_SECRET")
-REDIRECT_URI = 'http://localhost:3450/api'
+REDIRECT_URI = 'http://localhost:4000/api'
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
@@ -139,4 +139,4 @@ def analyze_user_genres():
     return jsonify(genre_percentages), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3450, debug = True)
+    app.run(host='0.0.0.0', port=4000, debug = True)

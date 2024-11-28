@@ -40,7 +40,7 @@ export async function GET() {
     const spotifyData = await spotifyResponse.json();
 
     const backendResponse = await fetch(
-      'http://localhost:3450/api/stats',
+      'http://localhost:4000/api/stats',
       {
         method: 'POST',
         headers: {
