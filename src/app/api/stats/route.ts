@@ -1,9 +1,11 @@
-// app/api/stats/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSpotifyAuthToken } from "../getAuthToken";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const timeRange = searchParams.get('time_range') || 'long_term';
+
     const token = await getSpotifyAuthToken();
 
     if (!token) {
@@ -14,7 +16,7 @@ export async function GET() {
     }
 
     // Fetch the user data from the Spotify API
-    const spotifyUrl = "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term";
+    const spotifyUrl = `https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=${timeRange}`;
 
     // Call the Spotify API with the access token
     const spotifyResponse = await fetch(spotifyUrl, {
@@ -40,17 +42,16 @@ export async function GET() {
     const spotifyData = await spotifyResponse.json();
 
     const backendResponse = await fetch(
-      'http://localhost:4000/api/stats',
+      'http://127.0.0.1:4000/api/stats',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-  
         body: JSON.stringify({
           topTracks: spotifyData.items.map((track: any) => track.id),
         }),
-  
       }
     );
   
@@ -65,8 +66,7 @@ export async function GET() {
 
     const genres = await backendResponse.json();
 
-
-    console.log(genres)
+    console.log(genres);
 
     // Return both top tracks and recommendations
     return NextResponse.json({
@@ -80,6 +80,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-  
-  
 }

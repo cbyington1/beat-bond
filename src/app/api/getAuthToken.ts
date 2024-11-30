@@ -1,12 +1,7 @@
+// app/api/getAuthToken.ts
 import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/clerk-sdk-node";
 
-/**
- * Fetches the Spotify OAuth token for the authenticated user.
- * 
- * @returns {Promise<string>} - The Spotify OAuth token.
- * @throws {Error} - Throws an error if the token cannot be retrieved.
- */
 export async function getSpotifyAuthToken(): Promise<string> {
   try {
     // Retrieve the authenticated user's ID
@@ -46,7 +41,6 @@ export async function getSpotifyAuthToken(): Promise<string> {
       throw new Error(`Failed to retrieve Spotify OAuth token. Error: ${error.message}`);
     }
 
-    // If the error is not an instance of Error, handle it gracefully
     throw new Error("An unknown error occurred while fetching the Spotify OAuth token.");
   }
 }
