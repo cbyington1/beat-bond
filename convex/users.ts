@@ -24,9 +24,9 @@ export const updateUser = mutation(async (ctx) => {
   } else {
     // Add a new user if they don't already exist
     await ctx.db.insert("users", {
-      username: identity.nickname,
+      username: identity.nickname!,
       userID: identity.subject,
-      name: identity.name,
+      name: identity.name!,
       friends: [],
     });
   }
@@ -62,10 +62,19 @@ export const getUserDBID = query({
 export const searchUsersByUsername = query({
   args: { name: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const users = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("username"), args.name))
+      .withSearchIndex("searchUser", (q) =>
+        q.search("username", args.name)
+      )
       .collect();
+    
+      if (!users) {
+        throw new Error("No users found");
+      }
+      console.log("searching for users with username: ", args.name);
+      console.log(users);
+      return users;
   },
 });
 
