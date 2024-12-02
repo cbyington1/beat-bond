@@ -100,9 +100,9 @@ const Page = () => {
           </div>
 
           <div>
-            <ResponsiveContainer width="100%" height={500}>
+            <ResponsiveContainer width="100%" >
               <PieChart>
-                <Pie data={Object.entries(data.genres).map(([name, value]) => ({ name, value }))} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8">
+                <Pie data={Object.entries(data.genres).map(([name, value]) => ({ name, value: Math.round(value * 100)/100 }))} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8">
                   {Object.entries(data.genres).map(([genre], index) => (
                     <Cell key={`cell-${index}`} fill={`hsl(${index * 360 / Object.keys(data.genres).length}, 70%, 50%)`} />
                   ))}

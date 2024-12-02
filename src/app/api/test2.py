@@ -191,7 +191,6 @@ def recommendation():
 @app.route('/api/stats', methods=['POST'])
 @cross_origin(supports_credentials=True, origins="http://localhost:3000")
 def analyze_user_genres():
-    try:
         data = request.get_json()
         top_tracks = data.get('topTracks')
         token = request.headers.get('Authorization')
@@ -230,10 +229,7 @@ def analyze_user_genres():
         genre_percentages = {genre: (count / total_genres) * 100 for genre, count in sorted_genres}
         
         return jsonify(genre_percentages), 200
-        
-    except Exception as e:
-        print(f"Error in genre analysis: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+    
 
 @app.after_request
 def after_request(response):
