@@ -5,7 +5,6 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-
 const Page = () => {
   const { isSignedIn } = useAuth(); // Clerk hook to check authentication state
   interface Track {
@@ -51,7 +50,6 @@ const Page = () => {
   }
 
   return (
-    // buttons 
     <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-neutral-950 text-white p-6">
       <div className="mb-4 flex items-center space-x-4">
         <select 
@@ -100,19 +98,38 @@ const Page = () => {
           </div>
 
           <div>
-            <ResponsiveContainer width="100%" height={500}>
-              <PieChart>
-                <Pie data={Object.entries(data.genres).map(([name, value]) => ({ name, value }))} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8">
-                  {Object.entries(data.genres).map(([genre], index) => (
-                    <Cell key={`cell-${index}`} fill={`hsl(${index * 360 / Object.keys(data.genres).length}, 70%, 50%)`} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <h1 className="text-2xl font-bold mb-4">Genre Distribution</h1>
+            <div className="bg-neutral-800 rounded-lg p-4" style={{ height: '500px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie 
+                    data={Object.entries(data.genres).map(([name, value]) => ({ 
+                      name, 
+                      value,
+                      displayValue: `${Math.round(value)}%`
+                    }))} 
+                    dataKey="value" 
+                    nameKey="name" 
+                    cx="50%" 
+                    cy="50%" 
+                    outerRadius={150}
+                    fill="#8884d8"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {Object.entries(data.genres).map(([genre], index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={`hsl(${index * 360 / Object.keys(data.genres).length}, 70%, 50%)`} 
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => `${Math.round(value)}%`} />
+                  
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          </div>
+        </div>
         </>
       )}
     </div>
@@ -120,5 +137,3 @@ const Page = () => {
 };
 
 export default Page;
-
- 
