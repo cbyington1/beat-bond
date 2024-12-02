@@ -1,5 +1,4 @@
 'use client'
-
 import Image from "next/image";
 import React from "react";
 import { Card } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import MainPage from "@/components/mainpage";
 
 export default function Home() {
-  const { isLoaded, isSignedIn, user } = useUser()
+  const { isLoaded, isSignedIn, user } = useUser();
 
   if (!isLoaded) {
     return (

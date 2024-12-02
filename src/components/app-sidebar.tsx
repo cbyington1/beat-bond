@@ -23,7 +23,7 @@ const data = {
     },
     {
       title: "Playlists",
-      url: "/playlists",
+      url: "/protected/playlists",
     },
     {
       title: "Recommendations",

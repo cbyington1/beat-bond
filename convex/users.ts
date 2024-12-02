@@ -2,24 +2,30 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Define a mutation to insert or update user information
-export const updateUser = mutation(async ({ db }, user: { username?: string; userID?: string; name?: string; }) => {
+export const updateUser = mutation(async (ctx) => {
   // Check if the user already exists
-  const existingUser = await db
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error('Authentication required');
+  }
+  const existingUser = await ctx.db
     .query("users")
-    .filter((q) => q.eq(q.field("userID"), user.userID))
+    .filter((q) => q.eq(q.field("userID"), identity.id))
     .first();
 
   if (existingUser) {
     // Update the user's information if they already exist
-    await db.patch(existingUser._id, {
-      name: user.name,
+    await ctx.db.patch(existingUser._id, {
+      username: identity.username,
+      userID: identity.userID,
+      name: identity.name,
     });
   } else {
     // Add a new user if they don't already exist
-    await db.insert("users", {
-      username: user.username,
-      userID: user.userID,
-      name: user.name,
+    await ctx.db.insert("users", {
+      username: identity.username,
+      userID: identity.id,
+      name: identity.name,
     });
   }
 });
@@ -27,11 +33,27 @@ export const updateUser = mutation(async ({ db }, user: { username?: string; use
 // Define a query to fetch a user by email
 export const getUserByUserID = query({
   args: { userID: v.string() },
-  handler: async ({ db }, { userID }) => {
-    return await db
+  handler: async (ctx, args) => {
+    return await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("email"), userID))
+      .filter((q) => q.eq(q.field("userID"), args.userID))
       .first();
+  },
+});
+
+export const getUserDBID = query({
+  args: { userID: v.string() },
+  handler: async (ctx, args) => {
+    const userDoc = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userID"), args.userID))
+      .first();
+
+    if (!userDoc) {
+      throw new Error("User not found");
+    } else {
+      return userDoc._id;
+    }
   },
 });
 
