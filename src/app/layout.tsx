@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+// import { AppSidebar } from "@/components/app-sidebar"
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "./convexClientProvider";
 
@@ -24,10 +24,9 @@ export default function RootLayout({
       <html lang="en">
         <body className="bg-black">
           <SidebarProvider>
-            <AppSidebar />
-            <main className="h-screen w-screen">
+            <main className="w-screen">
               <ConvexClientProvider>
-              {children}
+                {children}
               </ConvexClientProvider>
             </main>
           </SidebarProvider>

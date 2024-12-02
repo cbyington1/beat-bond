@@ -19,7 +19,7 @@ const data = {
   navMain: [
     {
       title: "Home",
-      url: "/",
+      url: "/protected/homepage",
     },
     {
       title: "Playlists",
@@ -32,6 +32,10 @@ const data = {
     {
       title: "Stats",
       url: "/protected/stats",
+    },
+    {
+      title: "Search",
+      url: "/protected/search",
     },
   ],
 }

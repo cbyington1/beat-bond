@@ -8,23 +8,24 @@ export const updateUser = mutation(async (ctx) => {
   if (!identity) {
     throw new Error('Authentication required');
   }
+
   const existingUser = await ctx.db
     .query("users")
-    .filter((q) => q.eq(q.field("userID"), identity.id))
+    .filter((q) => q.eq(q.field("userID"), identity.subject))
     .first();
-
+  
   if (existingUser) {
     // Update the user's information if they already exist
     await ctx.db.patch(existingUser._id, {
-      username: identity.username,
-      userID: identity.userID,
+      username: identity.nickname,
+      userID: identity.subject,
       name: identity.name,
     });
   } else {
     // Add a new user if they don't already exist
     await ctx.db.insert("users", {
-      username: identity.username,
-      userID: identity.id,
+      username: identity.nickname,
+      userID: identity.subject,
       name: identity.name,
       friends: [],
     });
@@ -55,6 +56,16 @@ export const getUserDBID = query({
     } else {
       return userDoc._id;
     }
+  },
+});
+
+export const searchUsersByUsername = query({
+  args: { name: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("username"), args.name))
+      .collect();
   },
 });
 

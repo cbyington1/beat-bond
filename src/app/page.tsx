@@ -1,49 +1,30 @@
 'use client'
 import Image from "next/image";
 import React from "react";
-import { Card } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { Skeleton } from "@/components/ui/skeleton";
-import MainPage from "@/components/mainpage";
+import { SignInButton, SignedOut } from "@clerk/nextjs";
+import { useMutation } from "convex/react";
+import { api } from "@/../convex/_generated/api";
 
 export default function Home() {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
+  const router = useRouter();
+  const updateUser = useMutation(api.users.updateUser);
 
-  if (!isLoaded) {
+  if (!isSignedIn) {
     return (
-      <div className="h-full w-full py-2 pr-2">
-        <Card className="h-full w-full bg-bbbackground text-[#FFFFFF] text-2xl">
-          <div className="p-4">
-            <Image src='/bblogo.jpeg' alt="bblogo" width={150} height={150} className="rounded-xl"></Image>
-            <Skeleton className="h-7 w-7 rounded-full"></Skeleton>
-            <Skeleton className='h-4 w-[150px] self-center'></Skeleton>
-          </div>
-        </Card>
-      </div>
-    )
-  } else if (!isSignedIn) {
-      return (
-        <div className="h-full w-full py-2 pr-2">
-        <Card className="h-full w-full bg-bbbackground text-[#FFFFFF] text-2xl">
-          <div className="p-4">
-            <Image src='/bblogo.jpeg' alt="bblogo" width={150} height={150} className="rounded-xl"></Image>
-            <p>Hello, Please sign in</p>
-          </div>
-        </Card>
-      </div>
-      )
-  }
-
-  const username = user.firstName
-  return (
-    <div className="h-full w-full py-2 pr-2">
-      <Card className="h-fit w-full border-none bg-gray-900 text-[#FFFFFF] text-2xl">
-        <div className="p-4">
-          <Image src='/bblogo.jpeg' alt="bblogo" width={150} height={150} className="rounded-xl"></Image>
-          <p>Hello {username}!</p>
-          <MainPage />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white space-y-2">
+      <Image src="/bblogo.jpeg" alt="BeatBond Logo" width={500} height={500} className="rounded-3xl" />
+      <SignedOut>
+        <div className="px-4 py-2 bg-blue-500 text-white rounded-md transition-transform transform hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
+          <SignInButton />
         </div>
-      </Card>
+      </SignedOut>
     </div>
-  );
+    );
+  } else {
+    updateUser()
+    router.push("/protected/homepage");
+  }
 }

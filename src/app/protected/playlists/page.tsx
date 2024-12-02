@@ -127,7 +127,7 @@ const Playlists = (): JSX.Element => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen w-full bg-black text-white p-6">
       <h1 className="text-2xl font-bold mb-4">AI Recommended Playlist</h1>
       {fetchingRecommendations ? (
         <div className="text-center py-8">
