@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 const MainPage = () => {
   const { isSignedIn } = useAuth(); // Clerk hook to check authentication state
@@ -21,6 +23,14 @@ const MainPage = () => {
   const [data, setData] = useState<SpotifyData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const savePlaylistMutation = useMutation(api.playlists.savePlaylist);
+  const savePlaylist = async (data: SpotifyData) => {
+    const tracks = data.items.map((track) => track.id);
+
+    savePlaylistMutation({ name: "testPlaylist", tracks: tracks });
+    console.log("Playlist saved!");
+  }
+
   useEffect(() => {
     const fetchTopTracks = async () => {
       try {
@@ -39,6 +49,7 @@ const MainPage = () => {
 
     if (isSignedIn) {
       fetchTopTracks();
+      
     }
   }, [isSignedIn]); // Ensure this effect only runs if the user is signed in
 
@@ -56,6 +67,12 @@ const MainPage = () => {
 
   return (
     <div>
+      <button 
+        onClick={() => savePlaylist(data!)}
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+      >
+        Save Playlist
+      </button>
       <h1>Top Tracks</h1>
       {data.items.slice(0, 5).map((track) => (
         <li key={track.id} className="p-2 list-none">

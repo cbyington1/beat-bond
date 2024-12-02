@@ -26,6 +26,7 @@ export const updateUser = mutation(async (ctx) => {
       username: identity.username,
       userID: identity.id,
       name: identity.name,
+      friends: [],
     });
   }
 });
