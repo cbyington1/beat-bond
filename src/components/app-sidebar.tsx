@@ -37,6 +37,10 @@ const data = {
       title: "Search",
       url: "/protected/search",
     },
+    {
+      title: "Profile",
+      url: "/protected/profile",
+    }
   ],
 }
 

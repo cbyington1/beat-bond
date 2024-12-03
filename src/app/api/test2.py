@@ -4,6 +4,8 @@ from flask_cors import CORS, cross_origin
 import requests
 import random
 import os
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
  
 load_dotenv()
@@ -16,7 +18,20 @@ LASTFM_API_URL = "http://ws.audioscrobbler.com/2.0/"
 LASTFM_API_KEY = "67051887b21d801412236d9d03f7c314"
  
 # Spotify API Base URL
+CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIPY_ClIENT_SECRET")
+AUTH_URL = 'https://accounts.spotify.com/authorize'
+TOKEN_URL = 'https://accounts.spotify.com/api/token'
 API_BASE_URL = 'https://api.spotify.com/v1'
+SCOPE = 'user-read-private user-read-email user-top-read'
+
+REDIRECT_URI = 'http://localhost:4000/api'
+
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
+                                               client_secret=CLIENT_SECRET,
+                                               redirect_uri=REDIRECT_URI,
+                                               scope=SCOPE,
+                                               show_dialog=True))  
  
 # Caching
 artist_cache = {}
@@ -195,13 +210,6 @@ def analyze_user_genres():
     try:
         data = request.get_json()
         top_tracks = data.get('topTracks')
-        token = request.headers.get('Authorization')
-       
-        if not token:
-            return jsonify({"error": "No authorization token provided"}), 401
-           
-        token = token.replace('Bearer ', '')
-        headers = get_spotify_headers(token)
        
         artist_ids = set()
         for track_id in top_tracks:
@@ -215,16 +223,10 @@ def analyze_user_genres():
        
         for i in range(0, len(artist_ids), 50):
             batch = artist_ids[i:i+50]
-            response = requests.get(
-                f"{API_BASE_URL}/artists",
-                headers=headers,
-                params={'ids': ','.join(batch)}
-            )
-            if response.status_code == 200:
-                artists_info = response.json()['artists']
-                for artist in artists_info:
-                    for genre in artist['genres']:
-                        genre_counts[genre] = genre_counts.get(genre, 0) + 1
+            artists_info = sp.artists(batch)['artists']
+            for artist in artists_info:
+                for genre in artist['genres']:
+                    genre_counts[genre] = genre_counts.get(genre, 0) + 1
        
         sorted_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)
         total_genres = sum(genre_counts.values())

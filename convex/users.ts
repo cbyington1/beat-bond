@@ -11,7 +11,7 @@ export const updateUser = mutation(async (ctx) => {
 
   const existingUser = await ctx.db
     .query("users")
-    .filter((q) => q.eq(q.field("userID"), identity.subject))
+    .filter((q) => q.eq(q.field("userID"), identity.nickname))
     .first();
   
   if (existingUser) {
