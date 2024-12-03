@@ -26,6 +26,12 @@ const Page = () => {
     genres: { [key: string]: number };
   }
 
+  const timeRangeMap: { [key: string]: string } = {
+    'short_term': '4 weeks',
+    'medium_term': '6 months',
+    'long_term': '1 year'
+  };
+
   const [data, setData] = useState<SpotifyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<string>("long_term");
@@ -55,7 +61,7 @@ const Page = () => {
     return (
       <Card className="p-4 bg-gray-800/50 border-gray-700">
         <p className="text-gray-400 text-center">
-          Please sign in to view your Spotify profile.
+          {`Please sign in to view your Spotify profile.`}
         </p>
       </Card>
     );
@@ -69,9 +75,9 @@ const Page = () => {
           onChange={(e) => setTimeRange(e.target.value)}
           className="bg-gray-800/50 text-gray-200 p-2 rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
         >
-          <option value="long_term">Long Term</option>
-          <option value="medium_term">Medium Term</option>
-          <option value="short_term">Short Term</option>
+          <option value="long_term">1 year</option>
+          <option value="medium_term">6 months</option>
+          <option value="short_term">4 weeks</option>
         </select>
         
         <button 
@@ -133,7 +139,7 @@ const Page = () => {
       {data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
-            <h1 className="text-xl font-semibold text-gray-400">Top Tracks</h1>
+            <h1 className="text-xl font-semibold text-gray-400">Top Tracks in {timeRangeMap[timeRange]}</h1>
             <Card className="bg-gray-800/50 border-gray-700 p-4">
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {data.topTracks.map((track) => (

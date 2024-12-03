@@ -7,12 +7,15 @@ export default defineSchema({
     ownerTo: v.id("users"),
     tracks: v.array(v.string()),
   }),
+  stats: defineTable({
+    ownerTo: v.id("users"),
+    topGenre: v.string(),
+    topTracks: v.array(v.string()),
+  }),
   users: defineTable({
     friends: v.array(v.any()),
     name: v.string(),
     userID: v.string(),
     username: v.string(),
-  }).searchIndex("searchUser", {
-    searchField: "username",
-  }),
+  }).searchIndex("searchUser", { searchField: "username" }),
 });
