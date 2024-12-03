@@ -23,13 +23,11 @@ export default function RootLayout({
     <ClerkProvider dynamic>
       <html lang="en">
         <body className="bg-black">
-          <SidebarProvider>
-            <main className="w-screen">
-              <ConvexClientProvider>
-                {children}
-              </ConvexClientProvider>
-            </main>
-          </SidebarProvider>
+          <main className="w-screen h-screen">
+            <ConvexClientProvider>
+              {children}
+            </ConvexClientProvider>
+          </main>
         </body>
       </html>
     </ClerkProvider>

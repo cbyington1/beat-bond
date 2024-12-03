@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 export default function Protected({
     children,
@@ -7,9 +8,9 @@ export default function Protected({
     children: React.ReactNode;
   }>) {
     return (
-        <div className='inline-flex w-screen h-screen'>
-            <AppSidebar/>
-            {children}
-        </div>
+      <SidebarProvider>
+        <AppSidebar/>
+        {children}
+      </SidebarProvider>
     );
 };
