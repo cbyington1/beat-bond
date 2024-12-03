@@ -68,7 +68,7 @@ const MainPage = () => {
   if (error) {
     return (
       <Card className="p-4 bg-gray-800/50 border-gray-700">
-        <p className="text-red-400 text-center">Error: {error}</p>
+        <p className="text-red-400 text-center">Error: {"Please Connect A Spotify Account!"}</p>
       </Card>
     );
   }

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
    
     if (!token) {
       return NextResponse.json(
-        { message: "Access token is undefined" },
+        { message: "Please Connect A Spotify Account!" },
         { status: 500 }
       );
     }

@@ -27,7 +27,7 @@ export async function GET() {
     // Check if the accessToken is undefined
     if (!accessToken) {
       return NextResponse.json(
-        { message: "Access token is undefined" },
+        { message: "Please Connect A Spotify Account!" },
         { status: 500 }
       );
     }

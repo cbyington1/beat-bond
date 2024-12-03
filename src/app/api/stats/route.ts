@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSpotifyAuthToken } from "../getAuthToken";
 
-
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -11,7 +9,7 @@ export async function GET(request: Request) {
 
     if (!token) {
       return NextResponse.json(
-        { message: "Access token is undefined" },
+        { message: "Please Connect A Spotify Account!" },
         { status: 500 }
       );
     }
