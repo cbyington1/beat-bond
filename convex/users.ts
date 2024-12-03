@@ -24,9 +24,9 @@ export const updateUser = mutation(async (ctx) => {
   } else {
     // Add a new user if they don't already exist
     await ctx.db.insert("users", {
-      username: identity.nickname,
+      username: identity.nickname!,
       userID: identity.subject,
-      name: identity.name,
+      name: identity.name!,
       friends: [],
     });
   }
@@ -62,14 +62,49 @@ export const getUserDBID = query({
 export const searchUsersByUsername = query({
   args: { name: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const users = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("username"), args.name))
+      .withSearchIndex("searchUser", (q) =>
+        q.search("username", args.name)
+      )
       .collect();
+    
+      if (!users) {
+        throw new Error("No users found");
+      }
+      console.log("searching for users with username: ", args.name);
+      console.log(users);
+      return users;
   },
 });
 
 // Define a query to fetch all users
 export const getAllUsers = query(async ({ db }) => {
   return await db.query("users").collect();
+});
+
+export const addFriend = mutation(async (ctx, args: { friendID: string }) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Authentication required");
+  }
+  const userDoc = await ctx.db.query("users").filter((q) => q.eq(q.field("userID"), identity.subject)).first();
+  if (!userDoc) {
+    throw new Error("User not found");
+  }
+  const friendDoc = await ctx.db
+    .query("users")
+    .filter((q) => q.eq(q.field("userID"), args.friendID))
+    .first();
+  if (!friendDoc) {
+    throw new Error("Friend not found");
+  }
+
+  if (userDoc?.friends.includes(friendDoc._id)) {
+    throw new Error("Friend already added");
+  }
+
+  await ctx.db.patch(userDoc._id, {
+    friends: [...userDoc.friends, friendDoc._id],
+  });
 });

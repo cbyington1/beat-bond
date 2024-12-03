@@ -1,30 +1,34 @@
+import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getUserDBID } from "./users";
 
-export const savePlaylist = mutation(async (ctx, playlist: { name: string; tracks: string[] }) => {
+export const updateStats = mutation(async (ctx, stats: { topTracks: string[]; topGenre: string }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
         throw new Error("Authentication required");
     }
     const userDBID = await getUserDBID(ctx, { userID: identity.subject });
-    console.log("Saving playlist for user", userDBID);
-    await ctx.db.insert("playlists", {
-        name: playlist.name,
-        tracks: playlist.tracks,
+    if (!userDBID) {
+        throw new Error("User not found");
+    }
+    await ctx.db.insert("stats", {
+        topTracks: stats.topTracks,
+        topGenre: stats.topGenre,
         ownerTo: userDBID,
     });
 });
 
-export const getPlaylist = query({
-    handler: async ( ctx ) => {
+export const getStats = query({
+    args: { userID: v.string() },
+    handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
             throw new Error("Authentication required");
         }
         const userDBID = await getUserDBID(ctx, { userID: identity.subject });
         return await ctx.db
-            .query("playlists")
+            .query("stats")
             .filter((q) => q.eq(q.field("ownerTo"), userDBID))
             .first();
-    },
+    }
 });
