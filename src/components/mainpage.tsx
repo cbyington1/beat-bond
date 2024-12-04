@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
-import { useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import { Skeleton } from "./ui/skeleton";
 import Image from "next/image";
 
@@ -24,14 +22,6 @@ const MainPage = () => {
 
   const [data, setData] = useState<SpotifyData | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const savePlaylistMutation = useMutation(api.playlists.savePlaylist);
-  const savePlaylist = async (data: SpotifyData) => {
-    const tracks = data.items.map((track) => track.id);
-
-    savePlaylistMutation({ name: "testPlaylist", tracks: tracks });
-    console.log("Playlist saved!");
-  }
 
   useEffect(() => {
     const fetchTopTracks = async () => {

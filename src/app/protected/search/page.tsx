@@ -38,6 +38,7 @@ const SearchPage = () => {
                             placeholder="Search users..."
                             value={search}
                             onChange={(e) => handleInputChange(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch(search)}
                         />
                         <Button onClick={() => handleSearch(search)}>Search</Button>
                     </div>

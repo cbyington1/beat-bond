@@ -8,10 +8,9 @@ export const updateUser = mutation(async (ctx) => {
   if (!identity) {
     throw new Error('Authentication required');
   }
-
   const existingUser = await ctx.db
     .query("users")
-    .filter((q) => q.eq(q.field("userID"), identity.nickname))
+    .filter((q) => q.eq(q.field("userID"), identity.subject))
     .first();
   
   if (existingUser) {
@@ -106,10 +105,33 @@ export const addFriend = mutation(async (ctx, args: { friendID: string }) => {
   }
 
   if (userDoc?.friends.includes(friendDoc._id)) {
-    throw new Error("Friend already added");
+    return "Friend already added";
   }
 
   await ctx.db.patch(userDoc._id, {
     friends: [...userDoc.friends, friendDoc._id],
   });
+  return "Friend added successfully";
+});
+
+export const getFriends = query(async (ctx) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Authentication required");
+  }
+  const userDoc = await ctx.db.query("users").filter((q) => q.eq(q.field("userID"), identity.subject)).first();
+  if (!userDoc) {
+    throw new Error("User not found");
+  }
+  const friends = userDoc.friends;
+  const friendsDocs = [];
+  for (const friend of friends) {
+    const friendDoc = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("_id"), friend))
+      .first()
+    ;
+    friendsDocs.push(friendDoc);
+  }
+  return friendsDocs;
 });

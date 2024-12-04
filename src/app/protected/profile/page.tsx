@@ -9,7 +9,7 @@ import Image from 'next/image';
 import React from 'react'
 
 export default function Homepage() {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn } = useUser();
 
   if (!isLoaded) {
     return (
@@ -73,6 +73,8 @@ export default function Homepage() {
 
     const userStats = useQuery(api.stats.getStats, { userID: userID });
     const userPlaylists = useQuery(api.playlists.getPlaylist);
+
+    
 
     return (
       <div className="min-h-full w-full bg-gradient-to-b from-gray-900 to-gray-800 p-6">
