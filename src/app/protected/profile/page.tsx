@@ -10,7 +10,7 @@ import Image from 'next/image';
 import React from 'react'
 
 export default function Homepage() {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn } = useUser();
 
   if (!isLoaded) {
     return (

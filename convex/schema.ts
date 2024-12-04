@@ -13,7 +13,7 @@ export default defineSchema({
     topTracks: v.array(v.string()),
   }),
   users: defineTable({
-    friends: v.array(v.any()),
+    friends: v.array(v.string()),
     name: v.string(),
     userID: v.string(),
     username: v.string(),

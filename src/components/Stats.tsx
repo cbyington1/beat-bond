@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -8,6 +9,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ChartPieIcon } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 const Page = () => {
   const { isSignedIn } = useAuth();
@@ -37,6 +40,8 @@ const Page = () => {
   const [timeRange, setTimeRange] = useState<string>("long_term");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const updateStats = useMutation(api.stats.updateStats);
+
   const fetchTopTracks = async () => {
     setIsLoading(true);
     setError(null);
@@ -47,6 +52,13 @@ const Page = () => {
 
       if (response.ok) {
         setData(jsondata);
+        if(timeRange === 'long_term') {
+          if(data) {
+            const trackIDs = data.topTracks.map(track => track.id);
+            const topgenre = Object.entries(data.genres).map(([genre, value]) => ({ genre, value })).sort((a, b) => b.value - a.value)[0].genre;
+            updateStats({ topTracks: trackIDs, topGenre: topgenre });
+          }
+        }
       } else {
         setError(jsondata.message || "Failed to fetch top tracks");
       }
