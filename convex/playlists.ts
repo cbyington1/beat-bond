@@ -40,14 +40,14 @@ export const savePlaylist = mutation({
     }
 });
 
-export const getPlaylist = query({
+export const getRecentPlaylist = query({
     args: { userID: v.string() },
-    handler: async (ctx) => {
+    handler: async (ctx, userID) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
             throw new Error("Authentication required");
         }
-        const userDBID = await getUserDBID(ctx, { userID: identity.subject });
+        const userDBID = await getUserDBID(ctx, userID);
         return await ctx.db
             .query("playlists")
             .filter((q) => q.eq(q.field("ownerTo"), userDBID))
@@ -57,12 +57,12 @@ export const getPlaylist = query({
 
 export const getAllPlaylists = query({
     args: { userID: v.string() },
-    handler: async (ctx) => {
+    handler: async (ctx, userID) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
             throw new Error("Authentication required");
         }
-        const userDBID = await getUserDBID(ctx, { userID: identity.subject });
+        const userDBID = await getUserDBID(ctx, userID);
         
         return await ctx.db
             .query("playlists")

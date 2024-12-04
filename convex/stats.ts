@@ -11,11 +11,16 @@ export const updateStats = mutation(async (ctx, stats: { topTracks: string[]; to
     if (!userDBID) {
         throw new Error("User not found");
     }
-    await ctx.db.insert("stats", {
+    const res = await ctx.db.insert("stats", {
         topTracks: stats.topTracks,
         topGenre: stats.topGenre,
         ownerTo: userDBID,
     });
+    if (res) {
+        return res;
+    } else {
+        throw new Error("Failed to update stats");
+    }
 });
 
 export const getStats = query({

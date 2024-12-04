@@ -40,7 +40,8 @@ const UserProfile = () => {
   const userStats = useQuery(api.stats.getStats, { userID: userID });
   const [trackDetails, setTrackDetails] = useState<TrackInfo[]>([]);
   const [isTrackLoading, setIsTrackLoading] = useState(false);
-  const userPlaylists = useQuery(api.playlists.getPlaylist, { userID: userID });
+  const userPlaylists = useQuery(api.playlists.getRecentPlaylist, { userID: userID });
+
   const addFriends = useMutation(api.users.addFriend);
   const handleAddFriend = async () => {
     const res = await addFriends({ friendID: userID });
@@ -48,6 +49,15 @@ const UserProfile = () => {
       description: res,
     });
   };
+
+  const removeFriends = useMutation(api.users.removeFriend);
+  const handleRemoveFriend = async () => {
+    const res = await (removeFriends({ friendID: userID }));
+    toast({
+      description: res,
+    });
+  };
+
   useEffect(() => {
     const fetchTrackDetails = async () => {
       if (userPlaylists && userPlaylists.tracks.length > 0) {
@@ -113,12 +123,21 @@ const UserProfile = () => {
                     <p>
                       <strong>Username:</strong> {user.username}
                     </p>
-                    <Button
-                      className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={handleAddFriend}
-                    >
-                      Add Friend
-                    </Button>
+                    <div className="space-x-2">
+                      <Button
+                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={handleAddFriend}
+                      >
+                        Add Friend
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="mt-4 text-white"
+                        onClick={handleRemoveFriend}
+                      >
+                        Remove Friend
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -164,7 +183,7 @@ const UserProfile = () => {
                           Loading track details...
                         </p>
                       ) : (
-                        <ul className="text-gray-400 space-y-2 h-96 overflow-y-auto space-y-4 bg-gray-800 rounded p-4">
+                        <ul className="text-gray-400 h-96 overflow-y-auto space-y-4 bg-gray-800 rounded p-4">
                           {trackDetails.map(
                             (track: {
                               id: Key | null | undefined;

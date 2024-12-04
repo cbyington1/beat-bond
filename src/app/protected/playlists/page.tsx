@@ -28,7 +28,7 @@ const PlaylistsPage = () => {
   }
 
   // Fetch the playlist
-  const playlists = useQuery(api.playlists.getPlaylist, {userID: userID});
+  const playlists = useQuery(api.playlists.getRecentPlaylist, {userID: userID});
 
   const handleExportToSpotify = async () => {
     if (!selectedPlaylist) return;

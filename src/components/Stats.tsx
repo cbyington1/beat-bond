@@ -56,7 +56,12 @@ const Page = () => {
           if(data) {
             const trackIDs = data.topTracks.map(track => track.id);
             const topgenre = Object.entries(data.genres).map(([genre, value]) => ({ genre, value })).sort((a, b) => b.value - a.value)[0].genre;
-            updateStats({ topTracks: trackIDs, topGenre: topgenre });
+            const res = await updateStats({ topTracks: trackIDs, topGenre: topgenre });
+            if(res) {
+              console.log("Stats updated successfully");
+            } else {
+              setError("Failed to update stats");
+            }
           }
         }
       } else {

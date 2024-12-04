@@ -135,3 +135,30 @@ export const getFriends = query(async (ctx) => {
   }
   return friendsDocs;
 });
+
+export const removeFriend = mutation(async (ctx, args: { friendID: string }) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Authentication required");
+  }
+  const userDoc = await ctx.db.query("users").filter((q) => q.eq(q.field("userID"), identity.subject)).first();
+  if (!userDoc) {
+    throw new Error("User not found");
+  }
+  const friendDoc = await ctx.db
+    .query("users")
+    .filter((q) => q.eq(q.field("userID"), args.friendID))
+    .first();
+  if (!friendDoc) {
+    throw new Error("Friend not found");
+  }
+
+  if (!userDoc?.friends.includes(friendDoc._id)) {
+    return `${friendDoc.name} is not your friend`;
+  }
+
+  await ctx.db.patch(userDoc._id, {
+    friends: userDoc.friends.filter((friend) => friend !== friendDoc._id),
+  });
+  return "Friend removed successfully";
+});
