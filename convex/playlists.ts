@@ -70,3 +70,23 @@ export const getAllPlaylists = query({
             .collect();
     },
 });
+
+export const deletePlaylist = mutation({
+    args: { playlistID: v.string() },
+    handler: async (ctx, { playlistID }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            throw new Error("Authentication required");
+        }
+        const userDBID = await getUserDBID(ctx, { userID: identity.subject });
+        const normalizedPlaylistID = ctx.db.normalizeId("playlists", playlistID);
+        if (!normalizedPlaylistID) {
+            throw new Error("Invalid playlist ID");
+        }
+        const playlist = await ctx.db.get(normalizedPlaylistID);
+        if (!playlist || playlist.ownerTo !== userDBID) {
+            throw new Error("Playlist not found");
+        }
+        await ctx.db.delete(normalizedPlaylistID);
+    },
+});

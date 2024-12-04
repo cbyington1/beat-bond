@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useUser } from '@clerk/nextjs';
 import { useAuth } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/../../convex/_generated/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,12 @@ const PlaylistsPage = () => {
   const { isSignedIn } = useAuth();
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const userID = user?.id as string;
+
+  const delPlaylist = useMutation(api.playlists.deletePlaylist);
+  const handleDelPlaylistButton = async () => {
+    if (!selectedPlaylist) return;
+    delPlaylist({ playlistID: selectedPlaylist._id });
+  }
 
   // Fetch the playlist
   const playlists = useQuery(api.playlists.getPlaylist, {userID: userID});
@@ -117,6 +123,7 @@ const PlaylistsPage = () => {
                 <Button 
                   variant="destructive"
                   className="flex items-center gap-2"
+                  onClick={handleDelPlaylistButton}
                 >
                   <TrashIcon className="w-4 h-4" />
                   Delete

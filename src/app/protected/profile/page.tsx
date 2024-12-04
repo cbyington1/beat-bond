@@ -124,7 +124,7 @@ return (
                         <div className="space-y-6 flex-1 w-full">
                             <div className="space-y-4">
                                 <h1 className="text-3xl font-bold text-gray-400">
-                                    {userName}'s Profile
+                                    {`${userName}'s Profile`}
                                 </h1>
                                 
                                 <div className="grid md:grid-cols-2 gap-4 text-gray-400">
