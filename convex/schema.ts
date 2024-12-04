@@ -6,6 +6,7 @@ export default defineSchema({
     name: v.string(),
     ownerTo: v.id("users"),
     tracks: v.array(v.string()),
+    likes: v.array(v.number()),
   }),
   stats: defineTable({
     ownerTo: v.id("users"),
