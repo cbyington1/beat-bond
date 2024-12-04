@@ -36,10 +36,15 @@ export const updateUser = mutation(async (ctx) => {
 export const getUserByUserID = query({
   args: { userID: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const userDoc = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userID"), args.userID))
       .first();
+    
+      if (!userDoc) {
+        throw new Error("User not found");
+      }
+      return userDoc;
   },
 });
 

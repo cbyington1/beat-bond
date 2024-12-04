@@ -1,5 +1,4 @@
 "use client";
-import MainPage from '@/components/mainpage';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@clerk/nextjs';

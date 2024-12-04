@@ -43,7 +43,7 @@ const UserProfile = () => {
                             <div className="space-y-4">
 
                                 <h1 className="text-3xl font-bold text-gray-400">
-                                    {user.username}'s Profile
+                                    {`${user.username}'s Profile`}
                                 </h1>
                                 
                                 <div className="grid md:grid-cols-2 gap-4 text-gray-400">
