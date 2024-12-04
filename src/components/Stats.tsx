@@ -18,7 +18,7 @@ const Page = () => {
     album: {
       images: { url: string }[];
     };
-    artists: { href: string; name: string }[];
+    artists: { id: string; name: string }[];
   }
 
   interface SpotifyData {
@@ -167,7 +167,7 @@ const Page = () => {
                         <div className="flex items-center gap-1 text-gray-400 text-sm">
                           <span>by</span>
                           <Link
-                            href={track.artists[0].href}
+                            href={`https://open.spotify.com/artist/${track.artists[0].id}`}
                             className="truncate hover:text-cyan-400 transition-colors"
                           >
                             {track.artists[0].name}

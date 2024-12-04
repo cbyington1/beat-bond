@@ -1,195 +1,147 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useUser } from '@clerk/nextjs';
 import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "@/../../convex/_generated/api";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MusicIcon, DownloadIcon, TrashIcon } from "lucide-react";
 
-interface Track {
-  uri: string;
+interface Playlist {
+  _id: string;
   name: string;
+  tracks: string[];
 }
 
-interface ExportResponse {
-  success: boolean;
-  playlist_id: string;
-  playlist_url: string;
-  error?: string;
-}
-
-interface RecommendationsResponse {
-  recommendations: Track[];
-  error?: string;
-}
-
-const Playlists = (): JSX.Element => {
+const PlaylistsPage = () => {
+  const { user } = useUser();
   const { isSignedIn } = useAuth();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [exportSuccess, setExportSuccess] = useState<boolean>(false);
-  const [recommendations, setRecommendations] = useState<Track[]>([]);
-  const [fetchingRecommendations, setFetchingRecommendations] =
-    useState<boolean>(false);
-  const [playlistUrl, setPlaylistUrl] = useState<string | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const userID = user?.id as string;
 
-  useEffect(() => {
-    if (isSignedIn) {
-      void fetchRecommendations();
-    }
-  }, [isSignedIn]);
+  // Fetch the playlist
+  const playlists = useQuery(api.playlists.getPlaylist, {userID: userID});
 
-  const fetchRecommendations = async (): Promise<void> => {
-    setFetchingRecommendations(true);
-    setError(null);
+  const handleExportToSpotify = async () => {
+    if (!selectedPlaylist) return;
 
     try {
-      const response = await fetch("http://localhost:3450/api/recommendation", {
-        credentials: "include",
+      const response = await fetch('/api/spotify/export-playlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playlistName: selectedPlaylist.name,
+          trackIds: selectedPlaylist.tracks
+        })
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch recommendations");
+      if (response.ok) {
+        const result = await response.json();
+        window.open(result.playlistUrl, '_blank');
+      } else {
+        const errorData = await response.json();
+        alert(`Export failed: ${errorData.message}`);
       }
-
-      const data: RecommendationsResponse = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      setRecommendations(data.recommendations);
-    } catch (err) {
-      console.error(err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch recommendations. Please try again."
-      );
-    } finally {
-      setFetchingRecommendations(false);
-    }
-  };
-
-  const handleExport = async (): Promise<void> => {
-    if (!isSignedIn) {
-      setError("You must be signed in to export playlists.");
-      return;
-    }
-
-    if (recommendations.length === 0) {
-      setError("No recommendations available to export.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setExportSuccess(false);
-    setPlaylistUrl(null);
-
-    try {
-      const response = await fetch(
-        "http://localhost:3450/api/export-playlist",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            playlistName: "AI Recommended Playlist",
-            tracks: recommendations,
-          }),
-        }
-      );
-
-      const data: ExportResponse = await response.json();
-
-      if (!response.ok || data.error) {
-        throw new Error(data.error || "Failed to export playlist");
-      }
-
-      setExportSuccess(true);
-      setPlaylistUrl(data.playlist_url);
-    } catch (err) {
-      console.error(err);
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred."
-      );
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to export playlist');
     }
   };
 
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-black text-white p-6">
-        <h1 className="text-2xl font-bold mb-4">AI Recommended Playlist</h1>
-        <p>Please sign in to view and export your recommendations.</p>
-      </div>
+      <Card className="p-4 bg-gray-800/50 border-gray-700">
+        <p className="text-gray-400 text-center">
+          Please sign in to view your playlists.
+        </p>
+      </Card>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-black text-white p-6">
-      <h1 className="text-2xl font-bold mb-4">AI Recommended Playlist</h1>
-      {fetchingRecommendations ? (
-        <div className="text-center py-8">
-          <p>Fetching recommendations...</p>
-        </div>
-      ) : recommendations.length > 0 ? (
-        <div className="space-y-6">
-          <div className="bg-gray-900 p-4 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Recommended Tracks</h2>
-            <ul className="space-y-2">
-              {recommendations.map((track, index) => (
-                <li key={track.uri} className="flex items-center space-x-2">
-                  <span className="text-gray-400">{index + 1}.</span>
-                  <span>{track.name}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className="space-y-6 w-full max-w-5xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-gray-300 mb-4">My Playlists</h1>
 
-          <button
-            onClick={() => void handleExport()}
-            className="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loading}
-          >
-            {loading ? "Exporting..." : "Export to Spotify"}
-          </button>
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-400">No recommendations available.</p>
-          <button
-            onClick={() => void fetchRecommendations()}
-            className="mt-4 bg-white/10 text-white px-4 py-2 rounded-full hover:bg-white/20 transition-colors"
-          >
-            Refresh Recommendations
-          </button>
-        </div>
+      {!playlists && (
+        <Card className="p-8 bg-gray-800/50 border-gray-700 flex flex-col items-center justify-center">
+          <MusicIcon className="w-16 h-16 text-cyan-500/50 mb-4" />
+          <p className="text-gray-400 text-center">
+            No playlists found. Generate some recommendations to create your first playlist!
+          </p>
+        </Card>
       )}
 
-      {error && (
-        <div className="mt-4 p-4 bg-red-900/50 text-red-200 rounded-lg">
-          {error}
-        </div>
-      )}
-
-      {exportSuccess && (
-        <div className="mt-4 p-4 bg-green-900/50 text-green-200 rounded-lg">
-          <p>Playlist successfully exported to Spotify!</p>
-          {playlistUrl && (
-            <a
-              href={playlistUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-2 text-green-300 hover:text-green-100 underline"
+      <div className="grid md:grid-cols-[300px_1fr] gap-6">
+        {playlists && (
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-gray-300">Saved Playlist</h2>
+            <Card 
+              key={playlists._id} 
+              className={`p-4 bg-gray-800/50 border-gray-700 hover:bg-gray-700/50 cursor-pointer transition-colors ${
+                selectedPlaylist?._id === playlists._id ? 'ring-2 ring-cyan-500' : ''
+              }`}
+              onClick={() => setSelectedPlaylist(playlists)}
             >
-              Open in Spotify
-            </a>
-          )}
-        </div>
-      )}
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-lg font-semibold text-cyan-400">
+                    {playlists.name}
+                  </h2>
+                  <p className="text-gray-400">
+                    {playlists.tracks.length} tracks
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {selectedPlaylist && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-300">
+                {selectedPlaylist.name}
+              </h2>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleExportToSpotify} 
+                  className="flex items-center gap-2"
+                >
+                  <DownloadIcon className="w-4 h-4" />
+                  Export to Spotify
+                </Button>
+                <Button 
+                  variant="destructive"
+                  className="flex items-center gap-2"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-gray-400">Tracks</h3>
+              {selectedPlaylist.tracks.map((trackId, index) => (
+                <Card 
+                  key={trackId}
+                  className="p-2 bg-gray-800/50 border-gray-700 hover:bg-gray-700/50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">{index + 1}. {trackId}</span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default Playlists;
+export default PlaylistsPage;

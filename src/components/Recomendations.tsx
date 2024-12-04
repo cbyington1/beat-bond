@@ -4,14 +4,16 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { MusicIcon } from "lucide-react";
+import { MusicIcon, SaveIcon } from "lucide-react";
 import Image from "next/image";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
-const Page = () => {
+const RecommendationsPage = () => {
   const { isSignedIn } = useAuth();
+  const savePlaylist = useMutation(api.playlists.savePlaylist);
 
   interface Track {
     id: string;
@@ -31,6 +33,7 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<string>("long_term");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const fetchSpotifyData = async () => {
     setIsLoading(true);
@@ -49,6 +52,25 @@ const Page = () => {
       setError("An error occurred while fetching Spotify data");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSavePlaylist = async () => {
+    if (!data) return;
+
+    setIsSaving(true);
+    try {
+      const trackIds = data.recommendations.map(track => track.id);
+      await savePlaylist({ 
+        name: `Recommendations (${timeRange})`, 
+        tracks: trackIds 
+      });
+      alert("Playlist saved successfully!");
+    } catch (err) {
+      console.error("Failed to save playlist", err);
+      alert("Failed to save playlist");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -82,6 +104,17 @@ const Page = () => {
         >
           {isLoading ? "Loading..." : "Generate Recommendations"}
         </button>
+
+        {data && (
+          <Button 
+            onClick={handleSavePlaylist}
+            disabled={isSaving}
+            className="flex items-center gap-2"
+          >
+            <SaveIcon className="w-4 h-4" />
+            {isSaving ? "Saving..." : "Save Playlist"}
+          </Button>
+        )}
       </div>
 
       {error && (
@@ -214,4 +247,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default RecommendationsPage;

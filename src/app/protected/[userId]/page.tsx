@@ -7,16 +7,55 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParams } from 'next/navigation';
 
+interface TrackInfo {
+    id: string;
+    name: string;
+    artists: { name: string }[];
+
+    album: { 
+        name: string;
+        images: { url: string }[];
+    };
+}
 
 const UserProfile = () => {
     const params = useParams();
     const userID = params?.userId as string;
 
+    // Fetch the profile user's information
     const user = useQuery(api.users.getUserByUserID, { userID: userID });
-
     const userStats = useQuery(api.stats.getStats, { userID: userID });
+    const userPlaylists = useQuery(api.playlists.getPlaylist, { userID: "user_2nzkHTFaY0YWGJqmVpljlnYgUZM"});
 
-    const userPlaylists = useQuery(api.playlists.getPlaylist);
+    const [trackDetails, setTrackDetails] = useState<TrackInfo[]>([]);
+    const [isTrackLoading, setIsTrackLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchTrackDetails = async () => {
+            if (userPlaylists && userPlaylists.tracks.length > 0) {
+                setIsTrackLoading(true);
+                try {
+                    // Use multiple track IDs in a single request
+                    const trackIds = userPlaylists.tracks.join(',');
+                    const response = await fetch(`/api/trackinfo?trackIds=${trackIds}`);
+                    
+                    if (!response.ok) {
+                        console.error('Failed to fetch track details');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    setTrackDetails(data.tracks);
+                } catch (error) {
+                    console.error('Error fetching track details:', error);
+                } finally {
+                    setIsTrackLoading(false);
+                }
+            }
+        };
+
+        fetchTrackDetails();
+    }, [userPlaylists]);
 
     if (!user) {
         return (
@@ -41,7 +80,6 @@ const UserProfile = () => {
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                         <div className="space-y-6 flex-1 w-full">
                             <div className="space-y-4">
-
                                 <h1 className="text-3xl font-bold text-gray-400">
                                     {user.username}'s Profile
                                 </h1>
@@ -84,6 +122,28 @@ const UserProfile = () => {
                                             <p className="text-gray-400">
                                                 <strong>Tracks:</strong> {userPlaylists.tracks.length}
                                             </p>
+                                            {isTrackLoading ? (
+                                                <p className="text-gray-500">Loading track details...</p>
+                                            ) : (
+                                                <ul className="text-gray-400 space-y-2 h-96 overflow-y-auto space-y-4 bg-gray-800 rounded p-4">
+                                                    {trackDetails.map((track) => (
+                                                        <li key={track.id} className="flex items-center space-x-3">
+                                                            {track.album.images[0] && (
+                                                                <img 
+                                                                    src={track.album.images[0].url} 
+                                                                    className="w-12 h-12 rounded"
+                                                                />
+                                                            )}
+                                                            <div>
+                                                                <p className="text-cyan-400 font-medium truncate text-sm">{track.name}</p>
+                                                                <p className="flex items-center gap-1 text-gray-400 text-sm">
+                                                                    {track.artists.map(artist => artist.name).join(', ')}
+                                                                </p>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
                                         </div>
                                     ) : (
                                         <p className="text-gray-500">No playlists available</p>

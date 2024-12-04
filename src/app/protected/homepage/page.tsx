@@ -16,7 +16,7 @@ export default function Homepage() {
           <div className="p-8 flex flex-col items-center space-y-6">
             <div className="relative">
               <Image 
-                src='/bblogo.jpeg' 
+                src='/loading.gif' 
                 alt="bblogo" 
                 width={180} 
                 height={180} 

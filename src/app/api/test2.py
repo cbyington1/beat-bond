@@ -44,7 +44,7 @@ def get_similar_artists(seed_artists):
                 "artist": artist,
                 "api_key": LASTFM_API_KEY,
                 "format": "json",
-                "limit": 50
+                "limit": 10
             }
             
             try:
@@ -74,7 +74,7 @@ def get_similar_artists(seed_artists):
     random.shuffle(final_artists)
     return final_artists
 
-def get_recommended_tracks(similar_artists, limit=50):
+def get_recommended_tracks(similar_artists, limit=10):
     """Get tracks from similar artists using Last.fm."""
     recommendations = []
     
@@ -171,7 +171,7 @@ def recommendation():
         # Convert Last.fm recommendations to Spotify track IDs
         spotify_track_ids = []
         for rec in lastfm_recommendations:
-            if len(spotify_track_ids) >= 50:  # Stop once we have enough tracks
+            if len(spotify_track_ids) >= 10:  # Stop once we have enough tracks
                 break
                 
             track_id = search_spotify_track(rec['name'], rec['artist'], token)
@@ -211,8 +211,8 @@ def analyze_user_genres():
         genre_counts = {}
         artist_ids = list(artist_ids)
         
-        for i in range(0, len(artist_ids), 50):
-            batch = artist_ids[i:i+50]
+        for i in range(0, len(artist_ids), 10):
+            batch = artist_ids[i:i+10]
             response = requests.get(
                 f"{API_BASE_URL}/artists",
                 headers=headers,

@@ -46,14 +46,7 @@ const SearchPage = () => {
                             {users.map((user) => (
                                 <li 
                                     key={user.userID} 
-                                    className='
-                                        bg-gray-100 
-                                        p-2 
-                                        rounded 
-                                        hover:bg-gray-200 
-                                        cursor-pointer 
-                                        transition-colors
-                                    '
+                                    className='bg-gray-100 p-2 rounded hover:bg-gray-200 cursor-pointer transition-colors'
                                     onClick={() => redirectToProfile(user.userID)}
                                 >
                                     {user.username}

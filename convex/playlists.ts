@@ -1,22 +1,48 @@
+import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getUserDBID } from "./users";
 
-export const savePlaylist = mutation(async (ctx, playlist: { name: string; tracks: string[] }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-        throw new Error("Authentication required");
+export const savePlaylist = mutation({
+    args: { 
+        name: v.string(), 
+        tracks: v.array(v.string()) 
+    },
+    handler: async (ctx, { name, tracks }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            throw new Error("Authentication required");
+        }
+        const userDBID = await getUserDBID(ctx, { userID: identity.subject });
+        
+        // Optional: Check if a playlist with this name already exists and update it
+        const existingPlaylist = await ctx.db
+            .query("playlists")
+            .filter((q) => q.eq(q.field("ownerTo"), userDBID))
+            .filter((q) => q.eq(q.field("name"), name))
+            .first();
+
+        if (existingPlaylist) {
+            // Update existing playlist
+            await ctx.db.replace(existingPlaylist._id, {
+                name: name,
+                tracks: tracks,
+                ownerTo: userDBID
+            });
+            return existingPlaylist._id;
+        } else {
+            // Insert new playlist
+            return await ctx.db.insert("playlists", {
+                name: name,
+                tracks: tracks,
+                ownerTo: userDBID,
+            });
+        }
     }
-    const userDBID = await getUserDBID(ctx, { userID: identity.subject });
-    console.log("Saving playlist for user", userDBID);
-    await ctx.db.insert("playlists", {
-        name: playlist.name,
-        tracks: playlist.tracks,
-        ownerTo: userDBID,
-    });
 });
 
 export const getPlaylist = query({
-    handler: async ( ctx ) => {
+    args: { userID: v.string() },
+    handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
             throw new Error("Authentication required");
@@ -26,5 +52,21 @@ export const getPlaylist = query({
             .query("playlists")
             .filter((q) => q.eq(q.field("ownerTo"), userDBID))
             .first();
+    },
+});
+
+export const getAllPlaylists = query({
+    args: { userID: v.string() },
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            throw new Error("Authentication required");
+        }
+        const userDBID = await getUserDBID(ctx, { userID: identity.subject });
+        
+        return await ctx.db
+            .query("playlists")
+            .filter((q) => q.eq(q.field("ownerTo"), userDBID))
+            .collect();
     },
 });
