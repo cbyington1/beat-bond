@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/recommendation/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getSpotifyAuthToken } from "../getAuthToken";
 
 export async function GET(request: NextRequest) {
-
   try {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('time_range') || 'long_term';
