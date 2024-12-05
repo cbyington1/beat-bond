@@ -37,7 +37,7 @@ const UserProfile = () => {
 
   // Fetch the profile user's information
   const user = useQuery(api.users.getUserByUserID, { userID: userID });
-  const userStats = useQuery(api.stats.getStats, { userID: userID });
+  //const userStats = useQuery(api.stats.getStats, { userID: userID });
   const [trackDetails, setTrackDetails] = useState<TrackInfo[]>([]);
   const [isTrackLoading, setIsTrackLoading] = useState(false);
   const userPlaylists = useQuery(api.playlists.getRecentPlaylist, { userID: userID });
@@ -140,35 +140,11 @@ const UserProfile = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <h2 className="text-xl font-semibold text-gray-300">
-                      Music Stats
-                    </h2>
-                    {userStats ? (
-                      <>
-                        <p>
-                          <strong>Top Genre:</strong> {userStats.topGenre}
-                        </p>
-                        <p>
-                          <strong>Top Tracks:</strong>
-                        </p>
-                        <ul className="list-disc pl-5">
-                          {userStats.topTracks.map((track, index) => (
-                            <li key={index} className="truncate">
-                              {track}
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    ) : (
-                      <p className="text-gray-500">No stats available</p>
-                    )}
-                  </div>
                 </div>
 
                 <div className="mt-6">
                   <h2 className="text-xl font-semibold text-gray-300 mb-2">
-                    Playlists
+                    Recent Playlist:
                   </h2>
                   {userPlaylists ? (
                     <div className="bg-gray-800 p-4 rounded-lg">

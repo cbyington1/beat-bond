@@ -5,7 +5,7 @@ import { getUserDBID } from "./users";
 export const savePlaylist = mutation({
     args: { 
         name: v.string(), 
-        tracks: v.array(v.string()) 
+        tracks: v.any()
     },
     handler: async (ctx, { name, tracks }) => {
         const identity = await ctx.auth.getUserIdentity();

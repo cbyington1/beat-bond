@@ -33,15 +33,17 @@ const PlaylistsPage = () => {
   const handleExportToSpotify = async () => {
     if (!selectedPlaylist) return;
 
+    console.log('Exporting playlistsss:', selectedPlaylist.name, selectedPlaylist.tracks);
+
     try {
-      const response = await fetch('/api/spotify/export-playlist', {
+      const response = await fetch('/api/export-playlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           playlistName: selectedPlaylist.name,
-          trackIds: selectedPlaylist.tracks
+          tracks: selectedPlaylist.tracks
         })
       });
 

@@ -83,7 +83,7 @@ export default function Homepage() {
     const userID = user?.id as string;
     const userName = user?.username || user?.fullName || "User";
 
-    const userStats = useQuery(api.stats.getStats, { userID: userID });
+    //const userStats = useQuery(api.stats.getStats, { userID: userID });
     const userPlaylists = useQuery(api.playlists.getRecentPlaylist, {
       userID: userID,
     });
@@ -144,36 +144,11 @@ export default function Homepage() {
                         Edit Profile
                       </Button>
                     </div>
-
-                    <div className="space-y-2">
-                      <h2 className="text-xl font-semibold text-gray-300">
-                        Music Stats
-                      </h2>
-                      {userStats ? (
-                        <>
-                          <p>
-                            <strong>Top Genre:</strong> {userStats.topGenre}
-                          </p>
-                          <p>
-                            <strong>Top Tracks:</strong>
-                          </p>
-                          <ul className="list-disc pl-5">
-                            {userStats.topTracks.map((track, index) => (
-                              <li key={index} className="truncate">
-                                {track}
-                              </li>
-                            ))}
-                          </ul>
-                        </>
-                      ) : (
-                        <p className="text-gray-500">No stats available</p>
-                      )}
-                    </div>
                   </div>
 
                   <div className="mt-6">
                     <h2 className="text-xl font-semibold text-gray-300 mb-2">
-                      Playlists
+                      Recent Playlist:
                     </h2>
                     {userPlaylists ? (
                       <div className="bg-gray-800 p-4 rounded-lg">
@@ -188,7 +163,7 @@ export default function Homepage() {
                             Loading track details...
                           </p>
                         ) : (
-                          <ul className="text-gray-400 space-y-2 h-96 overflow-y-auto space-y-4 bg-gray-800 rounded p-4">
+                          <ul className="text-gray-400 space-y-2 h-96 overflow-y-auto bg-gray-800 rounded p-4">
                             {trackDetails.map((track) => (
                               <li
                                 key={track.id}

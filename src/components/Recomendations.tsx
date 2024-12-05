@@ -11,6 +11,7 @@ import { MusicIcon, SaveIcon } from "lucide-react";
 import Image from "next/image";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { ShadInput } from "./ui/shadcnInput";
 
 const RecommendationsPage = () => {
   const { isSignedIn } = useAuth();
@@ -35,6 +36,11 @@ const RecommendationsPage = () => {
   const [timeRange, setTimeRange] = useState<string>("long_term");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [playlistName, setPlaylistName] = useState<string>("");
+
+  const handleInputChange = (value: string) => {
+    setPlaylistName(value);
+  }
 
   const fetchSpotifyData = async () => {
     setIsLoading(true);
@@ -61,10 +67,10 @@ const RecommendationsPage = () => {
 
     setIsSaving(true);
     try {
-      const trackIds = data.recommendations.map(track => track.id);
+      const tracks = data.recommendations.map((track) => (track.id));
       await savePlaylist({ 
-        name: `Recommendations (${timeRange})`, 
-        tracks: trackIds 
+        name: `${playlistName}`, 
+        tracks: tracks,
       });
       alert("Playlist saved successfully!");
     } catch (err) {
@@ -107,14 +113,17 @@ const RecommendationsPage = () => {
         </button>
 
         {data && (
-          <Button 
-            onClick={handleSavePlaylist}
-            disabled={isSaving}
-            className="flex items-center gap-2"
-          >
-            <SaveIcon className="w-4 h-4" />
-            {isSaving ? "Saving..." : "Save Playlist"}
-          </Button>
+          <>
+            <ShadInput className="max-w-80 text-black" value={playlistName} onChange={(e) => handleInputChange(e.target.value)} placeholder="Search users..."/>
+            <Button 
+              onClick={handleSavePlaylist}
+              disabled={isSaving}
+              className="flex items-center gap-2"
+            >
+              <SaveIcon className="w-4 h-4" />
+              {isSaving ? "Saving..." : "Save Playlist"}
+            </Button>
+          </>
         )}
       </div>
 

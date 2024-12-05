@@ -5,7 +5,7 @@ export default defineSchema({
   playlists: defineTable({
     name: v.string(),
     ownerTo: v.id("users"),
-    tracks: v.array(v.string()),
+    tracks: v.any(),
   }),
   stats: defineTable({
     ownerTo: v.id("users"),
